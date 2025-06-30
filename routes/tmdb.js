@@ -104,5 +104,17 @@ router.get('/actor/:id', async (req, res) => {
     res.status(500).json({ error: 'Actor details fetch failed' });
   }
 });
+// ✅ 9. /movie/:id/providers
+router.get('/movie/:id/providers', async (req, res) => {
+    try {
+      const response = await instance.get(`/movie/${req.params.id}/watch/providers`);
+      res.json(response.data);
+    } catch (err) {
+      res.status(500).json({ error: 'Watch providers fetch failed' });
+    }
+  });
+  
+
+
 
 module.exports = router;
