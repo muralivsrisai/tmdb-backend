@@ -24,3 +24,6 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
     app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
   })
   .catch(err => console.error(err));
+
+const tmdbRoutes = require('./routes/tmdb');
+app.use('/api/tmdb', tmdbRoutes);
