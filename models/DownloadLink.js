@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const DownloadLinkSchema = new mongoose.Schema({
   movieId: {
-    type: Number,
+    type: Number, // TMDB movie ID
     required: true,
     unique: true,
   },
@@ -10,9 +10,8 @@ const DownloadLinkSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  links: {
-    type: Map,
-    of: String, // key = quality (e.g. '720p'), value = URL string
+  downloadLink: {
+    type: String,
     required: true,
   },
 });
