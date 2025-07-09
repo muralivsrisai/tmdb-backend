@@ -4,6 +4,7 @@ const User = require('../models/User');
 const {protect} = require('../middleware/authMiddleware');
 require('dotenv').config();
 
+const nodemailer = require('nodemailer');
 const router = express.Router();
 
 // Generate JWT Token
@@ -83,6 +84,61 @@ router.get('/profile', protect, async (req, res) => {
     res.status(500).json({ message: 'Error fetching profile' });
   }
 });
+
+
+// POST /auth/forgot-password
+router.post('/forgot-password', async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.status(404).json({ message: 'User not found' });
+
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+  const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+  // Email setup using nodemailer
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER, // your Gmail address
+      pass: process.env.EMAIL_PASS  // app password or Gmail password
+    }
+  });
+
+  const mailOptions = {
+    from: `"TMDB Support" <${process.env.EMAIL_USER}>`,
+    to: user.email,
+    subject: 'Password Reset Link',
+    html: `<p>Click <a href="${resetLink}">here</a> to reset your password. Link valid for 15 minutes.</p>`
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    res.json({ message: 'Reset link sent to your email' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error sending email' });
+  }
+});
+
+const bcrypt = require('bcrypt');
+
+// POST /auth/reset-password
+router.post('/reset-password', async (req, res) => {
+  const { token, newPassword } = req.body;
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    res.status(400).json({ message: 'Invalid or expired token' });
+  }
+});
+
 
 
 module.exports = router;
