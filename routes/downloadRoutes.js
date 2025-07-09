@@ -70,4 +70,36 @@ router.get('/movie-download/:movieId', async (req, res) => {
   }
 });
 
+// Admin-only update route
+router.put('/admin/movie-download/:movieId/:quality', protect, async (req, res) => {
+  const { movieId, quality } = req.params;
+  const { newUrl } = req.body;
+
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Admins only' });
+  }
+
+  try {
+    const result = await DownloadLink.findOne({ movieId });
+
+    if (!result) {
+      return res.status(404).json({ message: 'Movie not found' });
+    }
+
+    // Initialize downloadLinks if missing (for backward compatibility)
+    if (!result.downloadLinks) {
+      result.downloadLinks = {};
+    }
+
+    result.downloadLinks[quality] = newUrl;
+
+    await result.save();
+    res.json({ message: 'Link updated successfully', downloadLinks: result.downloadLinks });
+  } catch (err) {
+    console.error('Error updating download link:', err);
+    res.status(500).json({ message: 'Server error while updating' });
+  }
+});
+
+
 module.exports = router;
