@@ -138,4 +138,22 @@ router.get('/discover-language', async (req, res) => {
   }
 });
 
+// ✅ 11. /language-movies?langCode=xx&page=1
+router.get('/language-movies', async (req, res) => {
+  try {
+    const { langCode, page = 1 } = req.query;
+    const response = await instance.get('/discover/movie', {
+      params: {
+        with_original_language: langCode,
+        sort_by: 'popularity.desc',
+        page,
+      },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Language-based movies fetch failed' });
+  }
+});
+
+
 module.exports = router;
