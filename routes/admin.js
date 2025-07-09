@@ -21,9 +21,19 @@ router.post('/add-download', isAdmin, async (req, res) => {
 });
 
 // Get all users
-router.get('/users', isAdmin, async (req, res) => {
-  const users = await User.find().select('-password');
-  res.json(users);
+// routes/admin.js
+router.get('/users', protect, async (req, res) => {
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ message: 'Forbidden: Admins only' });
+  }
+
+  try {
+    const users = await User.find({}, 'name email');
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
 });
+
 
 module.exports = router;
