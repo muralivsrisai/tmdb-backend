@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const {protect} = require('../middleware/authMiddleware');
 require('dotenv').config();
 
 const router = express.Router();
@@ -53,5 +54,26 @@ router.post('/login', async (req, res) => {
     res.status(500).json({ message: 'Server error', error });
   }
 });
+
+router.put('/profile', protect, async (req, res) => {
+  const { username, profilePic, currentPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user.id);
+  if (!user) return res.status(404).json({ message: 'User not found' });
+
+  if (username) user.username = username;
+  if (profilePic) user.profilePic = profilePic;
+
+  if (newPassword) {
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) return res.status(400).json({ message: 'Incorrect current password' });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+  }
+
+  await user.save();
+  res.json({ username: user.username, email: user.email, profilePic: user.profilePic, role: user.role });
+});
+
 
 module.exports = router;
