@@ -75,5 +75,14 @@ router.put('/profile', protect, async (req, res) => {
   res.json({ username: user.username, email: user.email, profilePic: user.profilePic, role: user.role });
 });
 
+router.get('/profile', protect, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id).select('-password');
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching profile' });
+  }
+});
+
 
 module.exports = router;
