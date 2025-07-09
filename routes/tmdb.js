@@ -10,41 +10,42 @@ const instance = axios.create({
   params: { api_key: API_KEY },
 });
 
-// ✅ 1. /trending?page=1
+// ✅ 1. /trending?type=movie|tv&page=1
 router.get('/trending', async (req, res) => {
   try {
-    const { page = 1 } = req.query;
-    const response = await instance.get('/trending/movie/week', { params: { page } });
+    const { type = 'movie', page = 1 } = req.query;
+    const response = await instance.get(`/trending/${type}/week`, { params: { page } });
     res.json(response.data);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch trending movies' });
+    res.status(500).json({ error: 'Failed to fetch trending content' });
   }
 });
 
-// ✅ 2. /search?query=...&page=...
+// ✅ 2. /search?query=...&type=movie|tv&page=...
 router.get('/search', async (req, res) => {
   try {
-    const { query, page = 1 } = req.query;
-    const response = await instance.get('/search/movie', { params: { query, page } });
+    const { query, type = 'movie', page = 1 } = req.query;
+    const response = await instance.get(`/search/${type}`, { params: { query, page } });
     res.json(response.data);
   } catch (err) {
     res.status(500).json({ error: 'Search failed' });
   }
 });
 
-// ✅ 3. /movie/:id
-router.get('/movie/:id', async (req, res) => {
+// ✅ 3. /details/:type/:id
+router.get('/details/:type/:id', async (req, res) => {
   try {
-    const response = await instance.get(`/movie/${req.params.id}`, {
+    const { type, id } = req.params;
+    const response = await instance.get(`/${type}/${id}`, {
       params: { append_to_response: 'videos,credits' }
     });
     res.json(response.data);
   } catch (err) {
-    res.status(500).json({ error: 'Movie fetch failed' });
+    res.status(500).json({ error: `${type} details fetch failed` });
   }
 });
 
-// ✅ 4. /upcoming?page=...
+// ✅ 4. /upcoming?page=... (only for movies)
 router.get('/upcoming', async (req, res) => {
   try {
     const { page = 1 } = req.query;
@@ -55,21 +56,22 @@ router.get('/upcoming', async (req, res) => {
   }
 });
 
-// ✅ 5. /genres
+// ✅ 5. /genres?type=movie|tv
 router.get('/genres', async (req, res) => {
   try {
-    const response = await instance.get('/genre/movie/list');
+    const { type = 'movie' } = req.query;
+    const response = await instance.get(`/genre/${type}/list`);
     res.json(response.data);
   } catch (err) {
     res.status(500).json({ error: 'Genres fetch failed' });
   }
 });
 
-// ✅ 6. /discover?genreId=...&page=...
+// ✅ 6. /discover?type=movie|tv&genreId=...&page=...
 router.get('/discover', async (req, res) => {
   try {
-    const { genreId, page = 1 } = req.query;
-    const response = await instance.get('/discover/movie', {
+    const { type = 'movie', genreId, page = 1 } = req.query;
+    const response = await instance.get(`/discover/${type}`, {
       params: { with_genres: genreId, page }
     });
     res.json(response.data);
@@ -78,11 +80,11 @@ router.get('/discover', async (req, res) => {
   }
 });
 
-// ✅ 7. /representative?genreId=...
+// ✅ 7. /representative?type=movie|tv&genreId=...
 router.get('/representative', async (req, res) => {
   try {
-    const { genreId } = req.query;
-    const response = await instance.get('/discover/movie', {
+    const { type = 'movie', genreId } = req.query;
+    const response = await instance.get(`/discover/${type}`, {
       params: {
         with_genres: genreId,
         sort_by: 'vote_average.desc',
@@ -104,17 +106,16 @@ router.get('/actor/:id', async (req, res) => {
     res.status(500).json({ error: 'Actor details fetch failed' });
   }
 });
-// ✅ 9. /movie/:id/providers
-router.get('/movie/:id/providers', async (req, res) => {
-    try {
-      const response = await instance.get(`/movie/${req.params.id}/watch/providers`);
-      res.json(response.data);
-    } catch (err) {
-      res.status(500).json({ error: 'Watch providers fetch failed' });
-    }
-  });
-  
 
-
+// ✅ 9. /providers/:type/:id (for both movie and tv)
+router.get('/providers/:type/:id', async (req, res) => {
+  try {
+    const { type, id } = req.params;
+    const response = await instance.get(`/${type}/${id}/watch/providers`);
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Watch providers fetch failed' });
+  }
+});
 
 module.exports = router;
