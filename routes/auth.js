@@ -131,14 +131,15 @@ router.post('/reset-password', async (req, res) => {
     const user = await User.findById(decoded.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
+    user.password = newPassword; // ❌ no hash here
+    await user.save();           // ✅ will be hashed by pre('save') middleware
 
     res.json({ message: 'Password updated successfully' });
   } catch (err) {
     res.status(400).json({ message: 'Invalid or expired token' });
   }
 });
+
 
 
 
