@@ -4,6 +4,10 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
+const adminRoutes = require('./routes/admin'); // Add this
+
+
+
 // Route Imports
 const authRoutes = require('./routes/auth');
 const watchlistRoutes = require('./routes/watchlist');
@@ -22,7 +26,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/watchlist', watchlistRoutes);
 app.use('/api/tmdb', tmdbRoutes);
 app.use('/api/download', downloadRoutes);
-
+app.use('/api/admin', adminRoutes); // Add this
 // DB + Server Init
 const PORT = process.env.PORT || 5000;
 
