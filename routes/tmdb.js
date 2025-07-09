@@ -10,7 +10,7 @@ const instance = axios.create({
   params: { api_key: API_KEY },
 });
 
-// ✅ 1. /trending?page=1
+// ✅ 1. Trending Movies
 router.get('/trending', async (req, res) => {
   try {
     const { page = 1 } = req.query;
@@ -21,7 +21,7 @@ router.get('/trending', async (req, res) => {
   }
 });
 
-// ✅ 2. /search?query=...&page=...
+// ✅ 2. Search Movies
 router.get('/search', async (req, res) => {
   try {
     const { query, page = 1 } = req.query;
@@ -32,7 +32,7 @@ router.get('/search', async (req, res) => {
   }
 });
 
-// ✅ 3. /movie/:id
+// ✅ 3. Movie Details
 router.get('/movie/:id', async (req, res) => {
   try {
     const response = await instance.get(`/movie/${req.params.id}`, {
@@ -44,7 +44,7 @@ router.get('/movie/:id', async (req, res) => {
   }
 });
 
-// ✅ 4. /upcoming?page=...
+// ✅ 4. Upcoming Movies
 router.get('/upcoming', async (req, res) => {
   try {
     const { page = 1 } = req.query;
@@ -55,7 +55,7 @@ router.get('/upcoming', async (req, res) => {
   }
 });
 
-// ✅ 5. /genres
+// ✅ 5. Genre List
 router.get('/genres', async (req, res) => {
   try {
     const response = await instance.get('/genre/movie/list');
@@ -65,7 +65,7 @@ router.get('/genres', async (req, res) => {
   }
 });
 
-// ✅ 6. /discover?genreId=...&page=...
+// ✅ 6. Movies by Genre
 router.get('/discover', async (req, res) => {
   try {
     const { genreId, page = 1 } = req.query;
@@ -78,7 +78,7 @@ router.get('/discover', async (req, res) => {
   }
 });
 
-// ✅ 7. /representative?genreId=...
+// ✅ 7. Representative Movie by Genre
 router.get('/representative', async (req, res) => {
   try {
     const { genreId } = req.query;
@@ -95,7 +95,7 @@ router.get('/representative', async (req, res) => {
   }
 });
 
-// ✅ 8. /actor/:id
+// ✅ 8. Actor Details
 router.get('/actor/:id', async (req, res) => {
   try {
     const response = await instance.get(`/person/${req.params.id}`);
@@ -104,17 +104,38 @@ router.get('/actor/:id', async (req, res) => {
     res.status(500).json({ error: 'Actor details fetch failed' });
   }
 });
-// ✅ 9. /movie/:id/providers
+
+// ✅ 9. Watch Providers
 router.get('/movie/:id/providers', async (req, res) => {
-    try {
-      const response = await instance.get(`/movie/${req.params.id}/watch/providers`);
-      res.json(response.data);
-    } catch (err) {
-      res.status(500).json({ error: 'Watch providers fetch failed' });
-    }
-  });
-  
+  try {
+    const response = await instance.get(`/movie/${req.params.id}/watch/providers`);
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Watch providers fetch failed' });
+  }
+});
 
+// ✅ 10. Language List
+router.get('/languages', async (req, res) => {
+  try {
+    const response = await instance.get('/configuration/languages');
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Languages fetch failed' });
+  }
+});
 
+// ✅ 11. Discover Movies by Language
+router.get('/discover-language', async (req, res) => {
+  try {
+    const { lang, page = 1 } = req.query;
+    const response = await instance.get('/discover/movie', {
+      params: { with_original_language: lang, page }
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Language discover failed' });
+  }
+});
 
 module.exports = router;
