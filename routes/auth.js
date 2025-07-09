@@ -3,6 +3,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const {protect} = require('../middleware/authMiddleware');
 require('dotenv').config();
+const bcrypt = require('bcrypt');
+
 
 const nodemailer = require('nodemailer');
 const router = express.Router();
@@ -120,7 +122,6 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-const bcrypt = require('bcrypt');
 
 // POST /auth/reset-password
 router.post('/reset-password', async (req, res) => {
