@@ -10,7 +10,7 @@ router.get('/users', protect, async (req, res) => {
       return res.status(403).json({ message: 'Access denied' });
     }
 
-    const users = await User.find({}, 'name email role'); // only return necessary fields
+    const users = await User.find({}, 'username email role'); // only return necessary fields
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: 'Server error' });
