@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 const { protect } = require('../middleware/authMiddleware');
+const axios = require('axios');
 
 // Get all users (Admin only)
 router.get('/users', protect, async (req, res) => {
