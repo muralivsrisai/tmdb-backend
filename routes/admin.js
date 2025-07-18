@@ -32,7 +32,7 @@ router.post('/send-mail', protect, async (req, res) => {
 
   try {
     // 1. Fetch trending movies from your own API (recommended)
-    const trendingResp = await axios.get('https://tmdb-backend-2o43.onrender.com/api/movies/trending'); // replace with your actual route
+    const trendingResp = await axios.get('https://tmdb-backend-2o43.onrender.com/api/tmdb/trending'); // replace with your actual route
     const moviesArr = trendingResp.data.results.slice(0, 7);
 
     // Make a pretty list
