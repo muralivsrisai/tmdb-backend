@@ -42,4 +42,7 @@ mongoose.connect(process.env.MONGO_URI, {
   app.get('/ping', (req, res) => {
     res.send('pong');
   });
+
+app.use('/admin', adminRoutes);
+
   
