@@ -50,14 +50,14 @@ router.post('/send-mail', protect, async (req, res) => {
       const subject = "Don't Miss This Week's 7 Trending Movies!";
       const message = `Hello ${user.username},
 
-Here are this week's top trending movies on YourSite:
+Here are this week's top trending movies on Gledati:
 
 ${moviesText}
 
 Catch up on these movies and more on our platform. Don't miss out!
 
 Enjoy,
-The YourSite Team`;
+The Gledati Team`;
 
       await sendMail({
         to: user.email,
