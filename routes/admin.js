@@ -21,33 +21,57 @@ const { sendMail } = require('../utils/mailer');
 
 // POST /admin/send-mail
 router.post('/send-mail', protect, async (req, res) => {
-  // Only allow admins
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Access denied' });
   }
-
-  const { userIds, subject, message } = req.body;
-  if (!Array.isArray(userIds) || !subject || !message) {
+  const { userIds } = req.body;
+  if (!Array.isArray(userIds)) {
     return res.status(400).json({ message: 'Invalid request payload' });
   }
 
   try {
+    // 1. Fetch trending movies from your own API (recommended)
+    const trendingResp = await axios.get('http://localhost:YOUR_PORT/api/movies/trending'); // replace with your actual route
+    const moviesArr = trendingResp.data.results.slice(0, 7);
+
+    // Make a pretty list
+    const moviesText = moviesArr
+  .map((movie, idx) =>
+    `${idx + 1}. ${movie.title} (${movie.release_date.slice(0,4)}) [${movie.vote_average}/10]`
+  ).join('\n');
+
+
+    // 2. Fetch target users
     const users = await User.find({ _id: { $in: userIds } });
-    const emails = users.map(u => u.email).filter(Boolean);
 
-    await sendMail({
-      to: emails, // You can use emails.join(', ') to send a single email to all, or loop to send individual messages
-      subject,
-      text: message
-    });
+    // 3. Send to each
+    for (const user of users) {
+      const subject = "Don't Miss This Week's 7 Trending Movies!";
+      const message = `Hello ${user.username},
 
-    res.json({ message: 'Emails sent successfully', count: emails.length });
+Here are this week's top trending movies on YourSite:
+
+${moviesText}
+
+Catch up on these movies and more on our platform. Don't miss out!
+
+Enjoy,
+The YourSite Team`;
+
+      await sendMail({
+        to: user.email,
+        subject,
+        text: message,
+      });
+    }
+
+    res.json({ message: 'Emails sent successfully', count: users.length });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Mail sending failed', error: error.message });
   }
 });
 
-module.exports = router;
 
 
 module.exports = router;
