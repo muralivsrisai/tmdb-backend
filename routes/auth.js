@@ -94,7 +94,10 @@ router.post('/forgot-password', async (req, res) => {
   if (!user) return res.status(404).json({ message: 'User not found' });
 
   // Create reset token with 15 min expiry
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: '15m',
+  });
+  
 
   const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
