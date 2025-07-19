@@ -93,13 +93,10 @@ router.post('/forgot-password', async (req, res) => {
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ message: 'User not found' });
 
-  // Create reset token with 15 min expiry
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: '15m',
-  });
-  
-
-  const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit code
+  user.resetCode = resetCode;
+  user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+  await user.save();
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -112,33 +109,37 @@ router.post('/forgot-password', async (req, res) => {
   const mailOptions = {
     from: `"TMDB Support" <${process.env.EMAIL_USER}>`,
     to: user.email,
-    subject: 'Password Reset Link',
-    html: `<p>Click <a href="${resetLink}">here</a> to reset your password. Link valid for 15 minutes.</p>`
+    subject: 'Your Password Reset Code',
+    html: `<p>Your reset code is: <b>${resetCode}</b>. It is valid for 15 minutes.</p>`
   };
 
   try {
     await transporter.sendMail(mailOptions);
-    res.json({ message: 'Reset link sent to your email' });
+    res.json({ message: 'Reset code sent to your email' });
   } catch (err) {
     res.status(500).json({ message: 'Error sending email' });
   }
 });
 
+
 // @route   POST /api/auth/reset-password
 router.post('/reset-password', async (req, res) => {
-  const { token, newPassword } = req.body;
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id);
-    if (!user) return res.status(404).json({ message: 'User not found' });
+  const { email, resetCode, newPassword } = req.body;
 
-    user.password = newPassword; // Will be hashed by pre-save hook
-    await user.save();
+  const user = await User.findOne({ email, resetCode });
+  if (!user) return res.status(400).json({ message: 'Invalid code or email' });
 
-    res.json({ message: 'Password updated successfully' });
-  } catch (err) {
-    res.status(400).json({ message: 'Invalid or expired token' });
+  if (user.resetCodeExpires < Date.now()) {
+    return res.status(400).json({ message: 'Reset code expired' });
   }
+
+  user.password = newPassword;
+  user.resetCode = undefined;
+  user.resetCodeExpires = undefined;
+  await user.save();
+
+  res.json({ message: 'Password reset successful' });
 });
+
 
 module.exports = router;
