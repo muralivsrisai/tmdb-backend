@@ -1,15 +1,14 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const {protect} = require('../middleware/authMiddleware');
+const { protect } = require('../middleware/authMiddleware');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
-
-
 const nodemailer = require('nodemailer');
+
 const router = express.Router();
 
-// Generate JWT Token
+// Generate JWT Token (no expiration for login/register)
 const generateToken = (user) => {
   return jwt.sign(
     { id: user._id, role: user.role },
@@ -57,6 +56,7 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// @route   PUT /api/auth/profile
 router.put('/profile', protect, async (req, res) => {
   const { username, profilePic, currentPassword, newPassword } = req.body;
 
@@ -77,6 +77,7 @@ router.put('/profile', protect, async (req, res) => {
   res.json({ username: user.username, email: user.email, profilePic: user.profilePic, role: user.role });
 });
 
+// @route   GET /api/auth/profile
 router.get('/profile', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id).select('-password');
@@ -86,23 +87,22 @@ router.get('/profile', protect, async (req, res) => {
   }
 });
 
-
-// POST /auth/forgot-password
+// @route   POST /api/auth/forgot-password
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ message: 'User not found' });
 
+  // Create reset token with 15 min expiry
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
 
   const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
 
-  // Email setup using nodemailer
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER, // your Gmail address
-      pass: process.env.EMAIL_PASS  // app password or Gmail password
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS
     }
   });
 
@@ -121,8 +121,7 @@ router.post('/forgot-password', async (req, res) => {
   }
 });
 
-
-// POST /auth/reset-password
+// @route   POST /api/auth/reset-password
 router.post('/reset-password', async (req, res) => {
   const { token, newPassword } = req.body;
   try {
@@ -130,16 +129,13 @@ router.post('/reset-password', async (req, res) => {
     const user = await User.findById(decoded.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
 
-    user.password = newPassword; // ❌ no hash here
-    await user.save();           // ✅ will be hashed by pre('save') middleware
+    user.password = newPassword; // Will be hashed by pre-save hook
+    await user.save();
 
     res.json({ message: 'Password updated successfully' });
   } catch (err) {
     res.status(400).json({ message: 'Invalid or expired token' });
   }
 });
-
-
-
 
 module.exports = router;
