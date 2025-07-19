@@ -128,8 +128,10 @@ router.post('/forgot-password', async (req, res) => {
     await transporter.sendMail(mailOptions);
     res.json({ message: 'Reset code sent to your email' });
   } catch (err) {
+    console.error('Email send error:', err); // Add this line
     res.status(500).json({ message: 'Error sending email' });
   }
+  
 });
 
 
