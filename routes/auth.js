@@ -90,14 +90,23 @@ router.get('/profile', protect, async (req, res) => {
 // @route   POST /api/auth/forgot-password
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
+
+  // Check if user exists
   const user = await User.findOne({ email });
   if (!user) return res.status(404).json({ message: 'User not found' });
 
-  // Create reset token with 15 min expiry
-  const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+  // Generate a 6-digit reset code and expiry
+  const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  user.resetCode = resetCode;
+  user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 min from now
 
-  const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+  try {
+    await user.save();
+  } catch (err) {
+    return res.status(500).json({ message: 'Error saving reset code' });
+  }
 
+  // Prepare nodemailer transporter
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -106,19 +115,23 @@ router.post('/forgot-password', async (req, res) => {
     }
   });
 
+  // Prepare mail
   const mailOptions = {
     from: `"TMDB Support" <${process.env.EMAIL_USER}>`,
     to: user.email,
-    subject: 'Password Reset Link',
-    html: `<p>Click <a href="${resetLink}">here</a> to reset your password. Link valid for 15 minutes.</p>`
+    subject: 'Your Password Reset Code',
+    html: `<p>Your reset code is: <b>${resetCode}</b>. It is valid for 15 minutes.</p>`
   };
 
+  // Send mail
   try {
     await transporter.sendMail(mailOptions);
-    res.json({ message: 'Reset link sent to your email' });
+    res.json({ message: 'Reset code sent to your email' });
   } catch (err) {
+    console.error('Email send error:', err); // Add this line
     res.status(500).json({ message: 'Error sending email' });
   }
+  
 });
 
 
