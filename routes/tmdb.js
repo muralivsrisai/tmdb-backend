@@ -155,5 +155,39 @@ router.get('/language-movies', async (req, res) => {
   }
 });
 
+// 📺 Trending Series
+router.get('/series', async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const response = await instance.get('/trending/tv/week', { params: { page } });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch trending series' });
+  }
+});
+
+// 🔍 Search Series
+router.get('/search-series', async (req, res) => {
+  try {
+    const { query, page = 1 } = req.query;
+    const response = await instance.get('/search/tv', { params: { query, page } });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Series search failed' });
+  }
+});
+
+// ℹ️ Series Details
+router.get('/series/:id', async (req, res) => {
+  try {
+    const response = await instance.get(`/tv/${req.params.id}`, {
+      params: { append_to_response: 'videos,credits' },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Series details fetch failed' });
+  }
+});
+
 
 module.exports = router;
