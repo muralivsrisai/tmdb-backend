@@ -14,7 +14,7 @@ const instance = axios.create({
 router.get('/trending', async (req, res) => {
   try {
     const { page = 1 } = req.query;
-    const response = await instance.get('/trending/movie/week', { params: { page } });
+    const response = await instance.get('/trending/all/day', { params: { page } });
     res.json(response.data);
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch trending movies' });
