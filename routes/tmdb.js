@@ -115,6 +115,15 @@ router.get('/movie/:id/providers', async (req, res) => {
   }
 });
 
+router.get('/tv/:id/providers', async (req, res) => {
+  try {
+    const response = await instance.get(`/tv/${req.params.id}/watch/providers`);
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Watch providers fetch failed' });
+  }
+});
+
 // ✅ 10. Language List
 router.get('/languages', async (req, res) => {
   try {
