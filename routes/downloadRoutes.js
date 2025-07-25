@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { protect } = require('../middleware/authMiddleware');
 const DownloadLink = require('../models/DownloadLink');
+const DownloadSeries=require('../models/DownloadSeries');
 
 // ✅ Admin: Add or update a download link (by quality)
 router.post('/admin/movie-download', protect, async (req, res) => {
@@ -116,7 +117,7 @@ router.post('/admin/series-download', protect, async (req, res) => {
   }
 
   try {
-    const updated = await DownloadLink.findOneAndUpdate(
+    const updated = await DownloadSeries.findOneAndUpdate(
       { seriesId },
       {
         $set: {
@@ -142,7 +143,7 @@ router.delete('/admin/series-download/:seriesId/:quality', protect, async (req, 
   }
 
   try {
-    const series = await DownloadLink.findOne({ seriesId });
+    const series = await DownloadSeries.findOne({ seriesId });
     if (!series) return res.status(404).json({ message: 'Movie not found' });
 
     if (series.downloadLinks.has(quality)) {
@@ -161,7 +162,7 @@ router.delete('/admin/series-download/:seriesId/:quality', protect, async (req, 
 // ✅ Public: Get all download links for a movie
 router.get('/series-download/:seriesId', async (req, res) => {
   try {
-    const result = await DownloadLink.findOne({ seriesId: req.params.seriesId });
+    const result = await DownloadSeries.findOne({ seriesId: req.params.seriesId });
     if (!result) return res.json({ downloadLinks: {} });
     res.json({ downloadLinks: result.downloadLinks });
   } catch (err) {
@@ -180,7 +181,7 @@ router.put('/admin/series-download/:seriesId/:quality', protect, async (req, res
   }
 
   try {
-    const result = await DownloadLink.findOne({ seriesId });
+    const result = await DownloadSeries.findOne({ seriesId });
 
     if (!result) {
       return res.status(404).json({ message: 'Movie not found' });
