@@ -198,5 +198,17 @@ router.get('/series/:id', async (req, res) => {
   }
 });
 
+// 📦 Series Seasons & Episodes Count
+router.get('/series/:id/seasons-episodes', async (req, res) => {
+  try {
+    const response = await instance.get(`/tv/${req.params.id}`);
+    const { number_of_seasons, number_of_episodes } = response.data;
+    res.json({ number_of_seasons, number_of_episodes });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch seasons and episodes info' });
+  }
+});
+
+
 
 module.exports = router;
