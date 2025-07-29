@@ -209,6 +209,51 @@ router.get('/series/:id/seasons-episodes', async (req, res) => {
   }
 });
 
+// ✅ Popular TV Series
+router.get('/popular-series', async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const response = await instance.get('/tv/popular', { params: { page } });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch popular series' });
+  }
+});
+
+// ✅ Upcoming / Currently Airing TV Series
+router.get('/upcoming-series', async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const response = await instance.get('/tv/on_the_air', { params: { page } });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch upcoming series' });
+  }
+});
+
+// ✅ TV Genre List
+router.get('/tv-genres', async (req, res) => {
+  try {
+    const response = await instance.get('/genre/tv/list');
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch TV genres' });
+  }
+});
+
+// ✅ Discover TV Series by Genre
+router.get('/series-by-genre', async (req, res) => {
+  try {
+    const { genreId, page = 1 } = req.query;
+    const response = await instance.get('/discover/tv', {
+      params: { with_genres: genreId, page },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch series by genre' });
+  }
+});
+
 
 
 module.exports = router;
