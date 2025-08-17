@@ -254,6 +254,20 @@ router.get('/series-by-genre', async (req, res) => {
   }
 });
 
+// ✅ Similar Movies
+router.get('/movie/:id/similar', async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const response = await instance.get(`/movie/${req.params.id}/similar`, {
+      params: { page },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch similar movies' });
+  }
+});
+
+
 
 
 module.exports = router;
