@@ -267,6 +267,19 @@ router.get('/movie/:id/similar', async (req, res) => {
   }
 });
 
+// ✅ Similar TV Series
+router.get('/tv/:id/similar', async (req, res) => {
+  try {
+    const { page = 1 } = req.query;
+    const response = await instance.get(`/tv/${req.params.id}/similar`, {
+      params: { page },
+    });
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch similar series' });
+  }
+});
+
 
 
 
