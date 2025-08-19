@@ -73,6 +73,22 @@ The Gledati Team`;
   }
 });
 
+const DownloadLink = require('../models/DownloadLink');
+
+// ✅ Get all download links
+router.get('/download-links', protect, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const links = await DownloadLink.find({});
+    res.json(links);
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 
 module.exports = router;
