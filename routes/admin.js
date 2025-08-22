@@ -41,7 +41,7 @@ router.post('/send-mail', protect, async (req, res) => {
 
     // 3. Send to each user
     for (const user of users) {
-      const subject = "🔥 This Week's Top 7 Trending Movies on Gledati!";
+      const subject = " This Week's Top 7 Trending Movies on Gledati!";
 
       // Generate movie list with posters
       const movieItems = moviesArr.map(
