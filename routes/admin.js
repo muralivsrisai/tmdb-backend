@@ -53,7 +53,7 @@ router.post('/send-mail', protect, async (req, res) => {
             <td style="padding: 10px; border-bottom: 1px solid #ddd;">
               <strong style="font-size:16px;">${idx + 1}. ${movie.title}</strong><br>
               <span style="color:#555;">${movie.release_date.slice(0,4)} | ⭐ ${movie.vote_average}/10</span><br>
-              <a href="https://gledati.com/movies/${movie.id}" style="display:inline-block;margin-top:5px;padding:6px 10px;background:#ff4b2b;color:#fff;border-radius:5px;text-decoration:none;font-size:12px;">Watch Now</a>
+              <a href="https://gledati.vercel.app/movie/${movie.id}" style="display:inline-block;margin-top:5px;padding:6px 10px;background:#ff4b2b;color:#fff;border-radius:5px;text-decoration:none;font-size:12px;">Watch Now</a>
             </td>
           </tr>
         `
