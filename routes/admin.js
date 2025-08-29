@@ -70,7 +70,7 @@ router.post('/send-mail', protect, async (req, res) => {
             <table style="width:100%; border-collapse: collapse;">
               ${movieItems}
             </table>
-            <p style="margin-top:20px;">Catch these and more on <a href="https://gledati.com" style="color:#ff4b2b; text-decoration:none;">Gledati</a>!</p>
+            <p style="margin-top:20px;">Catch these and more on <a href="https://gledati.vercel.app" style="color:#ff4b2b; text-decoration:none;">Gledati</a>!</p>
           </div>
           <div style="background:#f4f4f4; padding:10px; text-align:center; font-size:12px; color:#666;">
             © ${new Date().getFullYear()} Gledati. All Rights Reserved.
