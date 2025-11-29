@@ -280,6 +280,18 @@ router.get('/tv/:id/similar', async (req, res) => {
   }
 });
 
+// 📺 Episodes of a specific season
+router.get('/series/:id/season/:seasonNumber', async (req, res) => {
+  try {
+    const { id, seasonNumber } = req.params;
+    const response = await instance.get(`/tv/${id}/season/${seasonNumber}`);
+    res.json(response.data);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch season episodes' });
+  }
+});
+
+
 
 
 
