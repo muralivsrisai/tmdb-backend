@@ -21,7 +21,7 @@ router.get('/users', protect, async (req, res) => {
 });
 
 // ✅ Send Trending Movies Email (Styled HTML)
-router.post('/send-mail', async (req, res) => {
+router.post('/send-mail',protect, async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Access denied' });
   }
@@ -33,7 +33,7 @@ router.post('/send-mail', async (req, res) => {
 
   try {
     // 1. Fetch trending movies from your API
-    const trendingResp = await axios.get('https://gledati-backend.onrender.com/api/tmdb/trending');
+    const trendingResp = await axios.get('https://gledati-backend1.onrender.com/api/tmdb/trending');
     const moviesArr = trendingResp.data.results.slice(0, 7);
 
     // 2. Fetch target users
