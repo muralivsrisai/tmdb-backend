@@ -21,7 +21,7 @@ router.get('/users', protect, async (req, res) => {
 });
 
 // ✅ Send Trending Movies Email (Styled HTML)
-router.post('/send-mail', protect, async (req, res) => {
+router.post('/send-mail', async (req, res) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Access denied' });
   }
