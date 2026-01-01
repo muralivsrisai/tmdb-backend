@@ -1,23 +1,18 @@
-const nodemailer = require('nodemailer');
+const sgMail = require('@sendgrid/mail');
 
-const transporter = nodemailer.createTransport({
-  service: 'Gmail', // Or configure SMTP
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendMail = async ({ to, subject, text, html }) => {
-  const mailOptions = {
-    from: `"Gledati Support" <${process.env.EMAIL_USER}>`,
+  return sgMail.send({
     to,
+    from: {
+      email: process.env.EMAIL_USER,
+      name: 'Gledati Support'
+    },
     subject,
-    text, // fallback for clients that don't support HTML
-    html  // main HTML content
-  };
-
-  return transporter.sendMail(mailOptions);
+    text,
+    html
+  });
 };
 
 module.exports = { sendMail };
