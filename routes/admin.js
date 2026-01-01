@@ -33,8 +33,8 @@ router.post('/send-mail',protect, async (req, res) => {
 
   try {
     // 1. Fetch trending movies from your API
-    const trendingResp = await axios.get('https://gledati-backend1.onrender.com/api/tmdb/trending');
-    const moviesArr = trendingResp.data.results.slice(0, 7);
+    const trendingResp = await axios.get('https://tmdb-backend-2o43.onrender.com/api/tmdb/trending');
+    const moviesArr = trendingResp.data.results.slice(0, 10);
 
     // 2. Fetch target users
     const users = await User.find({ _id: { $in: userIds } });
