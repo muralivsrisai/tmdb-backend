@@ -1,25 +1,20 @@
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 
-const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendMail = async ({ to, subject, text, html }) => {
-  const mailOptions = {
-    from: `"Gledati Support" <${process.env.EMAIL_USER}>`,
+  const msg = {
     to,
+    from: {
+      email: process.env.EMAIL_USER,
+      name: "Gledati Support"
+    },
     subject,
     text,
     html
   };
 
-  return await transporter.sendMail(mailOptions);
+  return await sgMail.send(msg);
 };
 
 module.exports = { sendMail };
