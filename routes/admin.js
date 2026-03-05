@@ -40,51 +40,122 @@ router.post('/send-mail',protect, async (req, res) => {
     const users = await User.find({ _id: { $in: userIds } });
 
     // 3. Send to each user
-    for (const user of users) {
-      const subject = " This Week's Top 7 Trending Movies on Gledati!";
+    const subject = "This Week's Top 7 Trending Movies on Gledati!";
 
-      // Generate movie list with posters
-      const movieItems = moviesArr.map(
-        (movie, idx) => `
-          <tr>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-              <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" alt="${movie.title}" style="width:80px; border-radius:8px;">
-            </td>
-            <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-              <strong style="font-size:16px;">${idx + 1}. ${movie.title}</strong><br>
-              <span style="color:#555;">${movie.release_date.slice(0,4)} | ⭐ ${movie.vote_average}/10</span><br>
-              <a href="https://gledati.vercel.app/movie/${movie.id}" style="display:inline-block;margin-top:5px;padding:6px 10px;background:#ff4b2b;color:#fff;border-radius:5px;text-decoration:none;font-size:12px;">Watch Now</a>
-            </td>
-          </tr>
-        `
-      ).join('');
+await Promise.all(
+  users.map(async (user) => {
 
-      const htmlMessage = `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin:auto; background:#ffffff; border-radius:10px; overflow:hidden; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
-          <div style="background:#141414; color:#fff; padding:20px; text-align:center;">
-            <h1 style="margin:0;">Gledati Weekly Picks</h1>
+    const movieItems = moviesArr.map(
+      (movie, idx) => `
+        <tr>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+            <img src="https://image.tmdb.org/t/p/w200${movie.poster_path}" 
+                 alt="${movie.title}" 
+                 style="width:80px; border-radius:8px;">
+          </td>
+          <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+            <strong style="font-size:16px;">${idx + 1}. ${movie.title}</strong><br>
+            <span style="color:#555;">
+              ${movie.release_date.slice(0,4)} | ⭐ ${movie.vote_average}/10
+            </span><br>
+            <a href="https://gledati.vercel.app/movie/${movie.id}" 
+               style="display:inline-block;margin-top:5px;padding:6px 10px;background:#ff4b2b;color:#fff;border-radius:5px;text-decoration:none;font-size:12px;">
+               Watch Now
+            </a>
+          </td>
+        </tr>
+      `
+    ).join('');
+
+    const htmlMessage = `
+<div style="font-family: Arial, sans-serif; background:#0f0f0f; padding:20px;">
+  
+  <div style="max-width:600px; margin:auto; background:#141414; border-radius:10px; overflow:hidden;">
+
+    <!-- Header -->
+    <div style="padding:20px; text-align:center; border-bottom:1px solid #222;">
+      <h1 style="color:#ff4b2b; margin:0;">Gledati</h1>
+      <p style="color:#bbb; margin-top:5px;">Weekly Trending Movies</p>
+    </div>
+
+    <!-- Greeting -->
+    <div style="padding:20px;">
+      <p style="color:#fff; font-size:16px;">
+        Hi <strong>${user.username}</strong>,
+      </p>
+      <p style="color:#ccc;">
+        Here are <strong>this week's hottest trending movies</strong> you shouldn't miss:
+      </p>
+    </div>
+
+    <!-- Movie Cards -->
+    <div style="padding:10px 20px 20px 20px;">
+
+      ${moviesArr.map((movie, idx) => `
+        <div style="display:flex; margin-bottom:15px; background:#1c1c1c; border-radius:8px; overflow:hidden;">
+          
+          <img 
+            src="https://image.tmdb.org/t/p/w200${movie.poster_path}" 
+            alt="${movie.title}"
+            style="width:120px; object-fit:cover;"
+          />
+
+          <div style="padding:10px;">
+            <h3 style="margin:0; color:#fff;">
+              ${idx + 1}. ${movie.title}
+            </h3>
+
+            <p style="color:#aaa; font-size:13px; margin:5px 0;">
+              ${movie.release_date.slice(0,4)} • ⭐ ${movie.vote_average}/10
+            </p>
+
+            <a 
+              href="https://gledati.vercel.app/movie/${movie.id}"
+              style="display:inline-block;
+                     margin-top:8px;
+                     padding:6px 12px;
+                     background:#ff4b2b;
+                     color:#fff;
+                     text-decoration:none;
+                     border-radius:5px;
+                     font-size:12px;">
+              Watch Now
+            </a>
+
           </div>
-          <div style="padding:20px;">
-            <p>Hi <strong>${user.username}</strong>,</p>
-            <p>Here are <strong>this week's top 7 trending movies</strong> you shouldn’t miss:</p>
-            <table style="width:100%; border-collapse: collapse;">
-              ${movieItems}
-            </table>
-            <p style="margin-top:20px;">Catch these and more on <a href="https://gledati.vercel.app" style="color:#ff4b2b; text-decoration:none;">Gledati</a>!</p>
-          </div>
-          <div style="background:#f4f4f4; padding:10px; text-align:center; font-size:12px; color:#666;">
-            © ${new Date().getFullYear()} Gledati. All Rights Reserved.
-          </div>
+
         </div>
-      `;
+      `).join("")}
 
-      await sendMail({
-        to: user.email,
-        subject,
-        html: htmlMessage,
-        text: `Hello ${user.username},\n\nCheck out this week's top trending movies on Gledati.\n\n${moviesArr.map((m, i) => `${i + 1}. ${m.title}`).join('\n')}\n\nEnjoy!`,
-      });
-    }
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center; padding:15px; background:#0f0f0f;">
+      <p style="color:#777; font-size:12px;">
+        Discover more movies on 
+        <a href="https://gledati.vercel.app" style="color:#ff4b2b; text-decoration:none;">
+          Gledati
+        </a>
+      </p>
+      <p style="color:#555; font-size:11px;">
+        © ${new Date().getFullYear()} Gledati. All rights reserved.
+      </p>
+    </div>
+
+  </div>
+
+</div>
+`;
+
+    return sendMail({
+      to: user.email,
+      subject,
+      html: htmlMessage,
+      text: `Hello ${user.username}, check out this week's trending movies on Gledati.`
+    });
+
+  })
+);
 
     res.json({ message: 'Emails sent successfully', count: users.length });
   } catch (error) {
@@ -107,4 +178,18 @@ router.get('/download-links', protect, async (req, res) => {
   }
 });
 
+router.get("/test-mail", async (req, res) => {
+  try {
+    await sendMail({
+      to: "adabalamurali2728@gmail.com",
+      subject: "Test Email",
+      text: "Nodemailer working!"
+    });
+
+    res.send("Mail sent successfully");
+  } catch (err) {
+    console.log(err);
+    res.send("Mail failed");
+  }
+});
 module.exports = router;
